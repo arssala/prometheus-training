@@ -1,7 +1,7 @@
 Working with exporters
 ==
 ## Node Exporter
-Le Node Exporter est probablement l'un des premiers exportateurs que vous utiliserez. Il expose des métriques au niveau de la machine, en grande partie à partir du noyau de votre système d'exploitation, telles que le processeur, la mémoire, l'espace disque, les E / S disque, la bande passante réseau et la température de la carte mère. L'exportateur de nœuds est utilisé avec les systèmes Unix; Les utilisateurs de Windows doivent utiliser wmi_exporter à la place.
+Le Node Exporter est probablement l'un des premiers exportateurs que vous utiliserez. Il expose des métriques au niveau de la machine, en grande partie à partir du noyau de votre système d'exploitation, telles que le processeur, la mémoire, l'espace disque, les E/S disque, la bande passante réseau et la température de la carte mère. L'exportateur de nœuds est utilisé avec les systèmes Unix; Les utilisateurs de Windows doivent utiliser wmi_exporter à la place.
 
 Node Exporter est uniquement destiné à surveiller la machine elle-même, pas les processus ou services individuels sur celle-ci. Dans l'architecture Prometheus, chacun de vos services exposera ses propres métriques, en utilisant un exportateur si nécessaire, qui est ensuite directement récupéré par Prometheus. Cela vous évite de vous retrouver avec un goulot d'étranglement opérationnel ou de performance, et vous permet de penser davantage en termes de services dynamiques que de machines.
 
@@ -23,9 +23,15 @@ node_cpu_seconds_total{cpu="0",mode="nice"}           57.5
 node_cpu_seconds_total{cpu="0",mode="softirq"}        8.05
 node_cpu_seconds_total{cpu="0",mode="steal"}          0
 node_cpu_seconds_total{cpu="0",mode="system"}         1058.32
-node_cpu_seconds_total{cpu="0",mode="user"}           4234.94 node_cpu_seconds_total{cpu="1",mode="idle"}           9413.55 node_cpu_seconds_total{cpu="1",mode="iowait"}         57.41 node_cpu_seconds_total{cpu="1",mode="irq"}            0
-node_cpu_seconds_total{cpu="1",mode="nice"}            46.55 node_cpu_seconds_total{cpu="1",mode="softirq"}         7.58 node_cpu_seconds_total{cpu="1",mode="steal"}           0
-node_cpu_seconds_total{cpu="1",mode="system"}         1034.82 node_cpu_seconds_total{cpu="1",mode="user"}           4285.06
+node_cpu_seconds_total{cpu="0",mode="user"}           4234.94
+node_cpu_seconds_total{cpu="1",mode="idle"}           9413.55
+node_cpu_seconds_total{cpu="1",mode="iowait"}         57.41
+node_cpu_seconds_total{cpu="1",mode="irq"}            0
+node_cpu_seconds_total{cpu="1",mode="nice"}            46.55
+node_cpu_seconds_total{cpu="1",mode="softirq"}         7.58
+node_cpu_seconds_total{cpu="1",mode="steal"}           0
+node_cpu_seconds_total{cpu="1",mode="system"}         1034.82
+node_cpu_seconds_total{cpu="1",mode="user"}           4285.06
 ```
 
 Pour chaque CPU, les modes augmente globalement d'une seconde, par seconde. Cela vous permet de calculer la proportion de temps d'inactivité sur tous les processeurs à l'aide de l'expression PromQL:
@@ -46,9 +52,9 @@ Toutes les métriques de ce collecteur sont préfixées par `node_filesystem_` e
 ```
 # HELP node_filesystem_size_bytes Filesystem size in bytes.
 # TYPE node_filesystem_size_bytes gauge
-node_filesystem_size_bytes{device="/dev/sda1",fstype="ext4",mountpoint="/"}/1024/1024/1024
+node_filesystem_size_bytes{device="/dev/sda1",fstype="ext4",mountpoint="/"}
 ```
-Les métriques du système de fichiers sont largement évidentes. La seule subtilité dont vous devez être conscient est la différence entre node_filesystem_avail_bytes et node_filesystem_free_bytes. Sur les systèmes de fichiers Unix, de l'espace est réservé à l'utilisateur root, afin qu'il puisse encore faire des choses lorsque les utilisateurs remplissent tout l'espace disponible. node_filesystem_avail_bytes est l'espace disponible pour les utilisateurs, et lorsque vous essayez de calculer l'espace disque utilisé, vous devez utiliser en conséquence:
+Les métriques du système de fichiers sont largement évidentes. La seule subtilité dont vous devez être conscient est la différence entre node_filesystem_avail_bytes et node_filesystem_free_bytes. Sur les systèmes de fichiers Unix, l'espace est réservé à l'utilisateur root, afin qu'il puisse encore continuer à utiliser le système lorsque les utilisateurs remplissent tout l'espace disponible. node_filesystem_avail_bytes est l'espace disponible pour les utilisateurs, et lorsque vous essayez de calculer l'espace disque utilisé, vous devez utiliser en conséquence:
 ```
 node_filesystem_avail_bytes / node_filesystem_size_bytes
 ```
