@@ -80,7 +80,7 @@ Et si vous voulez bien gérer le routing, un petit outil pratique :
 ```
 curl -X POST http://localhost:9093/-/reload
 ```
-###B – Nginx
+### B – Nginx
 
 Alertmanager dispose lui aussi d’une interface Web, ce sera *https//sous.mondomaine.fr/alertmanager/*
 
@@ -162,7 +162,7 @@ curl -H "Content-Type: application/json" -d '[{"labels":{"alertname":"Test"}}]' 
 C’est d’ailleurs de cette façon que Prometheus déclenchera Alertmanager.
 Et peu de temps après, un mail doit arriver.
 
-### V – Liaison avec Prometheus
+### Liaison avec Prometheus
 
 On va connecter Prometheus et Alertmanager dans
 */etc/prometheus/prometheus.yml*, où l’on va modifier la partie alerting
