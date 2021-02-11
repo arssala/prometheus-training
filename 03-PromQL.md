@@ -7,12 +7,12 @@ Tout ce que vous devez savoir est très bien expliqué dans la [Prometheus docum
 À la base, le modèle de données représente les séries chronologiques
 sous la forme d'un nom de métrique suivi d'un ensemble de noms et de
 valeurs d'étiquette. Les échantillons sont des valeurs numériques
-associées à une série temporelle à un horodatage donné.
+associées à une time series à un horodatage donné.
 
 Voici la représentation d'une métrique avec différentes étiquettes:
 ```
-process_resident_memory_bytes{instance="127.0.0.1:9100",job="node_exporter"}
-process_resident_memory_bytes{instance="127.0.0.1:9090",job="prometheus"}
+process_resident_memory_bytes{instance="localhost:9100",job="node_exporter"}
+process_resident_memory_bytes{instance="localhost:9090",job="prometheus"}
 ```
 
 Le type d'une métrique peut être l'un des suivants:
@@ -23,13 +23,13 @@ Le type d'une métrique peut être l'un des suivants:
 
 L'histogramme et le Summary sont liés et offrent différents compromis. La principale différence du point de vue de l'utilisateur est que les histogrammes peuvent être agrégés alors que les Summary ne le peuvent pas (en général).
 
-*Exercice: visitez à nouveau le point de terminaison des métriques de Prometheus et vérifiez les différents types de métriques.*
+*Exercice: visitez à nouveau le point de terminaison des métriques (/metrics) de Prometheus et vérifiez les différents types de métriques.*
 
 ### Prometheus query language (PromQL)
 
 PromQL est un langage puissant qui permet de découper et de regrouper les données selon les besoins.
 
-Une expression peut vous obtenir toutes les séries temporelles pour un nom de métrique donné:
+Une expression peut vous obtenir toutes les time series pour un nom de métrique donné:
 
 ```
 node_cpu_seconds_total
@@ -43,12 +43,12 @@ Mais obtenir le nombre total de secondes qu'un processeur a passé dans
 chaque mode n'est pas vraiment significatif.
 Et si vous souhaitez obtenir le pourcentage de temps passé?
 C'est là que nous devons introduire des vecteurs et
-des fonctions de plage (`rate ()` en particulier).
+des fonctions de plage de temps (`rate ()` en particulier).
 
 Jusqu'à présent, nous n'avons utilisé que des sélecteurs de
 vecteurs instantanés qui renvoient un seul échantillon pour chaque
-série temporelle correspondant aux sélecteurs d'étiquettes donnés.
-Avec les sélecteurs de vecteurs de plage, Prometheus renvoie la liste
+time series correspondant aux sélecteurs d'étiquettes donnés.
+Avec les sélecteurs de range vectors, Prometheus renvoie la liste
 des échantillons dans la plage de temps donnée pour chaque série de temps.
 
 ```
@@ -83,7 +83,7 @@ sum(node_scrape_collector_duration_seconds) without (collector)
 Ces opérateurs d'agrégation sont familiers si vous connaissez déjà SQL.
 PromQL a également `min()`, `max()`, `avg()`, `count()` et [plus](https://prometheus.io/docs/prometheus/latest/querying/operators/# opérateurs d'agrégation).
 
-*Exercice: écrivez une requête qui retourne les 5 collecteurs prenant le plus de temps lors des grattages.*
+*Exercice: écrivez une requête qui retourne les 5 collecteurs prenant le plus de temps lors des grattage scrapping.*
 
 <details>
   <summary>Solution</summary>
@@ -93,8 +93,8 @@ topk(5, node_scrape_collector_duration_seconds)
 ```
 </details>
 
-PromQL prend également en charge la correspondance vectorielle pour
-les opérations binaires et arithméthiques.
+PromQL prend également en charge la correspondance vectorielle (vector match)
+pour les opérations binaires et arithméthiques.
 Allons-y générer des requêtes invalides à Prometheus:
 ```
 for i in {1..10}; do \
@@ -103,8 +103,26 @@ for i in {1..10}; do \
   sleep 5
 done
 ```
-
+`prometheus_http_requests_total` renvoie le nombre de requêtes reçue par Prometheus
+Calculons le total des requêtes HTTP reçues ayant renvoyé le code 400.
+```
+prometheus_http_requests_total{code="400"}
+```
+Ensuite, pour obtenir le pourcentage de demandes réussies, nous pouvons utiliser l'opérateur de division pour obtenir le nombre total de réponses 400 avec le nombre total de réponses et soustraire de 1
+```
+1 - (
+  sum(prometheus_http_requests_total{code="400"})
+   /
+  sum(prometheus_http_requests_total))
+```
 Et maintenant, nous pouvons demander à Prometheus le pourcentage de requêtes HTTP qui ont renvoyé un code d'état 400.
+```
+100 *
+  sum(prometheus_http_requests_total{code="400"})
+   /
+  sum(prometheus_http_requests_total)
+```
+Les requêtes ci-dessus nous donnent le taux d'erreur pour le dernier instant de temps pour lequel nous avons une mesure, mais pas pour une fenêtre de temps donnée. Rappelez-vous que nous pouvons interroger une fenêtre de temps en utilisant un sélecteur de plage, c'est-à- dire [5m], essayons cela ici:
 ```
 100 * sum(rate(prometheus_http_requests_total{code="400"}[5m])) / sum(rate(prometheus_http_requests_total[5m]))
 ```
@@ -119,10 +137,11 @@ Et maintenant, nous pouvons demander à Prometheus le pourcentage de requêtes H
 ```
 </details>
 
-Calculons maintenant [quantiles](https://en.wikipedia.org/wiki/Quantile).
+Calculons maintenant les [quantiles](https://en.wikipedia.org/wiki/Quantile).
 La méthode dépend du fait que la métrique est un summary ou un histogramme.
 Les summary peuvent être reconnus par leur étiquette `quantile`
-tandis que les métriques d'histogramme ont une étiquette `le` qui représente le compartiment de l'histogramme (le = inférieur ou égal).
+tandis que les métriques d'histogramme ont une étiquette `le` qui représente
+le compartiment de l'histogramme (le = inférieur ou égal).
 
 Voici un exemple de métrique récapitulative.
 
