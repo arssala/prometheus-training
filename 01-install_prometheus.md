@@ -373,7 +373,7 @@ poursuivre le cours.
 
 Output
 ```
-\u25cf prometheus.service - Prometheus
+● prometheus.service - Prometheus
    Loaded: loaded (/etc/systemd/system/prometheus.service; disabled; vendor preset: enabl
    Active: active (running) since Tue 2021-02-09 18:50:33 UTC; 8s ago
  Main PID: 2209 (prometheus)
@@ -512,7 +512,7 @@ continuer.
 
 Output
 ```
-\u25cf node_exporter.service - Node Exporter
+● node_exporter.service - Node Exporter
    Loaded: loaded (/etc/systemd/system/node_exporter.service; disabled; vendor preset: en
    Active: active (running) since Tue 2021-02-09 19:27:22 UTC; 6s ago
  Main PID: 2351 (node_exporter)
@@ -789,11 +789,11 @@ diviser par 1024 deux fois.
 Dans le champ **Expression** , entrez `node_memory_MemAvailable_bytes/1024/1024`,
 puis appuyez sur le bouton **Exécute**.
 
-L'onglet **Console** affichera désormais les résultats en mégaoctets.
+L'onglet **Table** affichera désormais les résultats en mégaoctets.
 
-Si vous souhaitez vérifier les résultats, exécutez la freecommande
-depuis votre terminal. (Le -hdrapeau indique de freefaire un rapport
-dans un format lisible par l'homme, nous donnant le montant en mégaoctets.)
+Si vous souhaitez vérifier les résultats, exécutez la commande `free`
+depuis votre terminal. (Le drapeau `-h` indique à free de faire un rapport
+dans un format lisible par l'homme, nous donnant le résultat en mégaoctets.)
 ```
 free -h
 ```
@@ -802,8 +802,8 @@ compris la mémoire disponible affichée dans la colonne **disponible** .
 
 Output
 ```
-total used free shared buff/cache available
-Mem: 488M 144M 17M 3.7M 326M 324M
+     total used free shared buff/cache available
+Mem:  488M 144M 17M  3.7M   326M       324M
 Swap: 0B 0B 0B
 ```
 En plus des opérateurs de base, le langage de requête Prometheus fournit
@@ -814,7 +814,7 @@ Dans le champ **Expression** , saisissez
 sur le bouton **Exécute**. Le résultat sera la mémoire moyenne
 disponible au cours des 5 dernières minutes en mégaoctets.
 
-Maintenant, cliquez sur l' onglet **Graphique** pour afficher
+Maintenant, cliquez sur l'onglet **Graph** pour afficher
 l'expression exécutée sous forme de graphique plutôt que sous forme de
 texte.
 
@@ -823,13 +823,11 @@ graphique pour plus de détails sur tout point spécifique le long des
 axes X et Y du graphique.
 
 Si vous souhaitez en savoir plus sur la création d'expressions dans
-l'interface Web intégrée de
-[Prometheus](https://prometheus.io/docs/querying/basics/) , consultez la
+l'interface Web intégrée de [Prometheus](https://prometheus.io/docs/querying/basics/) , consultez la
 partie [Interrogation de Prometheus](https://prometheus.io/docs/querying/basics/) de la
 documentation officielle.
 
 ## Conclusion
-
 
 Dans ce cours, nous avons téléchargé, configuré, sécurisé et testé
 une installation complète de Prometheus avec un exportateur
