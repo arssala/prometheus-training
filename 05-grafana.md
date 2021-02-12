@@ -124,9 +124,9 @@ du processeur sera affiché en rouge.
 
 Pour visualiser les données, nous utiliserons `irate()` de node_CPU (utilisation moyenne du processeur), pour un intervalle de 5m, avec la variable d'instance comme instance=~"$instance".
 Lorsque nous modifions l'instance à l'aide du menu déroulant, les mesures du panneau changent automatiquement.
-
+```
 100 - (avg(irate(node_cpu_seconds_total{mode="idle", instance=~"$instance"}[5m]))*100)
-
+```
 * L'onglet Panel peut être utilisé pour modifier le titre du panneau,
 la description, les liens, etc. Ajoutons maintenant le titre en tant que `CPU Usage [5m]`.
 
@@ -141,28 +141,29 @@ Maintenant que nous avons des visualisations de métriques CPU, ajoutons quelque
 
 2. Memory
 ajoutons une visualisation de la mémoire totale et de l'utilisation actuelle de la mémoire. Nous ajouterons cette fois plusieurs requêtes pour visualiser la mémoire disponible et la mémoire totale.
-
+```
 node_memory_MemAvailable_bytes{instance="$instance"}/1024/1024/1024
 node_memory_MemTotal_bytes{instance="$instance"}/1024/1024/1024
-
+```
 Ajouter un jauge pour la mémoire utilisé:
+```
 (node_memory_MemTotal_bytes{instance="$instance"}  - node_memory_MemAvailable_bytes{instance="$instance"} ) / node_memory_MemTotal_bytes{instance="$instance"} *100
-
+```
 3. Système de fichiers:
 Nous ajouterons le graphique de l'espace disque libre par rapport à l'espace disque total. Nous avons sélectionné les métriques filesystem_free et filesystem_size respectivement pour ce graphique. Ici, nous avons sélectionné le point de montage comme / pour visualiser les métriques pour le système de fichiers complet.
-
+```
 node_filesystem_free_bytes{instance="$instance", mountpoint="/"}
 node_filesystem_size_bytes{instance="$instance", mountpoint="/"}
-
+```
 Précisez la légende comme: free {{ mountpoint }} et total {{ mountpoint }}
 
 4. Réseau:
 dans cet exemple, nous visualisons la taille des données reçues et transmises sur différentes interfaces réseau. Ici, nous configurons l'unité de l'axe y en mégaoctets, mais elle peut être modifiée dans l'onglet visualisations en gigaoctets ou téraoctets (c'est beaucoup de trafic).
-
+```
 rate(node_network_receive_bytes_total{instance="$instance"}[1m])
 rate(node_network_transmit_bytes_total{instance="$instance"}[1m])
-
-Précisez la légende comme: Received {{ device }} et Sent {{ Device }}
+```
+Précisez la légende comme: Received {{ device }} et Sent {{ device }}
 
 Faites maintenant glisser toutes les visualisations ajoutées vers le Row.
 
@@ -174,11 +175,11 @@ Grafana fournit des intervalles de temps afin que nous puissions vérifier
 les métriques à un moment donné ou sur un intervalle de temps.
 Dans le coin supérieur droit, vous pouvez voir le menu déroulant où vous pouvez
 définir l'intervalle de temps pour les données. Il y en a quelques-uns habituels
-comme les 5 derniers mètres, la dernière heure, les 12 dernières heures et des
+comme les 5 dernières minutes, la dernière heure, les 12 dernières heures et des
 intervalles de temps personnalisés pour n'importe quelle date ou heure.
 
 L'actualisation automatique peut être utilisée pour actualiser les données à des
-intervalles de temps spécifiques comme toutes les 5 s, tous les 1 m, etc.
+intervalles de temps spécifiques comme toutes les 5s, tous les 1m, etc.
 
 # Alerte
 La visualisation des métriques est vraiment utile mais personne ne peut rester
@@ -203,61 +204,47 @@ Nous sélectionnons également où ces alertes doivent être envoyées, ici nous
 Cette alerte est évaluée toutes les 1m. Si aucune donnée n'est disponible,
 nous configurons l'état sur alerte, ce qui signifie qu'il déclenchera l'alerte
 si aucune donnée n'est disponible.
-
-
-
-indéfini
-
-
+![](images/memory_alert.png)
 
 Nous avons donc maintenant un tableau de bord fonctionnel et une configuration d'alerte.
 
-Importation et exportation de tableaux de bord
+# Importation et exportation de tableaux de bord
 Chaque tableau de bord de Grafana est basé sur JSON. Ces tableaux de bord peuvent être exportés à partir d'un fichier JSON ou du référentiel de tableaux de bord Grafana .
 
-Exportons le tableau de bord que nous venons de créer. Allez dans les paramètres du tableau de bord → Modèle JSON, il affiche un document JSON. Ce document JSON est une définition de tableau de bord complète qui peut être importée dans n'importe quelle autre instance Grafana. Sauvegardons-le sous node-exporter.json.
-
-
-
-indéfini
-
+Exportons le tableau de bord que nous venons de créer. Allez dans dashboard setting → JSON Model, il affiche un document JSON. Ce document JSON est une définition de tableau de bord complète qui peut être importée dans n'importe quelle autre instance Grafana. Sauvegardons-le sous node-exporter.json.
 
 
 Voyons maintenant comment nous pouvons importer un tableau de bord. Accédez à l'icône + en haut à gauche et cliquez sur importer. Le JSON que nous avons créé ci-dessus peut être collé ci-dessous pour être importé, ou nous pouvons coller l'ID du tableau de bord à partir du référentiel de tableau de bord Grafana , et il sera importé.
 
 
-
-indéfini
-
-
-
 Pour dupliquer un tableau de bord, accédez aux paramètres et enregistrez-le sous un nom différent et vous obtiendrez un tableau de bord en double.
 
-Plugins
+# Plugins
 Les plugins offrent un moyen d'étendre Grafana au-delà de ses fonctionnalités étonnantes afin que nous puissions obtenir de nouvelles sources de données, panneaux, types de tableaux de bord, etc.
 
-Installer des plugins
-Les plugins peuvent être installés à l'aide de Grafana CLI. Accédez au référentiel de plugins grafana et recherchez le plugin dont vous avez besoin, puis accédez à l'onglet d'installation pour voir l'identifiant du plugin (également disponible dans le chemin de l'URL). Pour installer un plugin, procédez comme suit.
-
+## Installer des plugins
+Les plugins peuvent être installés à l'aide de Grafana CLI. Accédez au référentiel de plugins grafana et recherchez le plugin dont vous avez besoin, puis accédez à l'onglet d'installation pour voir l'identifiant du plugin (également disponible dans le chemin de l'URL).
+Pour installer un plugin, procédez comme suit.
+```
 ‍grafana-cli plugins install <plugin-id>
-
+```
 
 Redémarrez le serveur Grafana.
-
+```
 Sudo service grafana-server restart.
-
+```
 
 Vous pouvez lister le plugin installé à l'aide de la commande suivante et vérifier qu'il est installé avec succès.
-
+```
 grafana-cli plugins ls
-
+```
 
 Si le plugin n'est pas disponible sur le référentiel de plugin Grafana, il peut être installé à partir d'une URL personnalisée ou d'un chemin local par exemple.
-
+```
 grafana-cli --pluginUrl https://plugins.example.com/grafana/plugins/<plugin-id>-<plugin-version>.zip plugins install <plugin-id>
+```
 
-
-Quelques plugins et tableaux de bord importants
+## Quelques plugins et tableaux de bord importants
 WorldPing: surveillez la disponibilité des applications Internet.
 Azure Monitor: la source de données pour les insights du moniteur Azure.
 PagerDuty: source de données Pagerduty
